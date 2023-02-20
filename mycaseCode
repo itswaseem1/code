@@ -1,0 +1,40 @@
+trigger caseTrigger(before insert){
+
+	if(Trigger.IsInsert && Trigger.IsBefore){
+	
+		Map<id, List<Cases> AccCasesMap = new Map<id, List<Cases>();
+		
+		for(Case  cs:Trigger.new]){
+			if(AccCasesMap.contains(cs.AccountId){
+				List<Case> csList = AccCasesMap.get(cs.AccountId);
+				csList.add(cs);
+				AccCasesMap.put(cs.AccountId, csList);
+			} else {
+				List<Case> csList = new List<Case>();
+				csList.add(cs);
+				AccCasesMap.put(cs.AccountId, csList);
+			}
+		}
+		List<Case> errorCases = new List<Case>();
+		for(Account ac : [SELECT id, (select id, Status from Cases ) from Account where id in :AccCasesMap.keySet()]{
+			Integer openCases = 0
+			Integer closedCases = 0
+			if(ac.cases >= 3){
+				for(Case c: acCases){
+					if(c.Status == 'Open'){
+						openCases++;
+					} else if(c.Status == 'Closed'){
+						closedCases++;
+					}
+					if(openCases >= 1 && closedCases >=2){
+						errorCases.add(AccCasesMap.get(ac.Id));
+						continue;
+					}
+				}
+			}
+		}
+		for(Case cs : errorCases){
+			cs.addError('Cannot create a case while one case is already open');
+		}
+	}
+}
